@@ -25,10 +25,10 @@ func TotalAmount_OneMonth(t *testing.T) {
 	acc := &Accounting{}
 	acc.DB = db
 	start, _ := time.Parse("2006-01-02", "2021-01-01")
-	end, _ := time.Parse("2006-01-02", "2021-01-31")
+	end, _ := time.Parse("2006-01-02", "2021-01-30")
 	amount := acc.TotalAmount(start, end)
-	if amount != 3100 {
-		t.Errorf("expect: %v, res: %v", 3100, amount)
+	if amount != 3000 {
+		t.Errorf("expect: %v, res: %v", 3000, amount)
 	} else {
 		t.Logf("Success")
 	}
