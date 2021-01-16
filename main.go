@@ -46,9 +46,10 @@ func (a *Accounting) TotalAmount(start, end time.Time) float64 {
 		startfirst := GetFirstDateOfMonth(start)
 		startLast := GetLastDateOfMonth(start)
 		days := GetDays(start, startLast)
+		// fmt.Println(startfirst, startLast, days)
 		mon := fmt.Sprintf("%d%02d", start.Year(), start.Month())
 
-		totalCount = float64(a.dateMap[mon].Amount/days) + totalCount
+		totalCount = float64((a.dateMap[mon].Amount / GetDays(startfirst, startLast) * days)) + totalCount
 
 		fmt.Println("totalCount = ", totalCount)
 		nextFirst := startfirst
@@ -57,10 +58,12 @@ func (a *Accounting) TotalAmount(start, end time.Time) float64 {
 			nextLast := GetLastDateOfMonth(nextFirst)
 			if nextLast.Month() == end.Month() {
 				days := GetDays(nextFirst, end)
+				// fmt.Println(days)
 				nextMon := fmt.Sprintf("%d%02d", end.Year(), end.Month())
-				return float64(a.dateMap[nextMon].Amount/days) + totalCount
+				return float64(a.dateMap[nextMon].Amount/GetDays(nextFirst, nextLast)*days) + totalCount
 			} else {
-				nextMon := fmt.Sprintf("%d%02d", end.Year(), end.Month())
+				nextMon := fmt.Sprintf("%d%02d", nextFirst.Year(), nextFirst.Month())
+				fmt.Println(totalCount, nextMon, a.dateMap[nextMon].Amount)
 				totalCount = float64(a.dateMap[nextMon].Amount) + totalCount
 			}
 		}
