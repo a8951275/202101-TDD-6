@@ -29,58 +29,33 @@ type Accounting struct {
 
 func (a *Accounting) TotalAmount(start, end time.Time) float64 {
 	a.GetAll()
-	first := GetFirstDateOfMonth(start)
-	last := GetLastDateOfMonth(end)
 
-	// 同月份
-	if first.Month() == last.Month() {
-		days := GetDays(first, last)
+	currentMon := GetFirstDateOfMonth(start)
+	var totalCount float64 = 0
+	for {
+		monLast := GetLastDateOfMonth(currentMon)
+		mon := fmt.Sprintf("%d%02d", currentMon.Year(), currentMon.Month())
+		monDays := GetDays(currentMon, monLast)
+		var diffDays int
 
-		if start == end {
-			mon := fmt.Sprintf("%d%02d", start.Year(), start.Month())
-			return float64(a.dateMap[mon].Amount / days)
-		}
-	} else {
-
-		var totalCount float64 = 0
-		startfirst := GetFirstDateOfMonth(start)
-		startLast := GetLastDateOfMonth(start)
-		days := GetDays(start, startLast)
-		// fmt.Println(startfirst, startLast, days)
-		mon := fmt.Sprintf("%d%02d", start.Year(), start.Month())
-
-		totalCount = float64((a.dateMap[mon].Amount / GetDays(startfirst, startLast) * days)) + totalCount
-
-		fmt.Println("totalCount = ", totalCount)
-		nextFirst := startfirst
-		for {
-			nextFirst = nextFirst.AddDate(0, 1, 0)
-			nextLast := GetLastDateOfMonth(nextFirst)
-			if nextLast.Month() == end.Month() {
-				days := GetDays(nextFirst, end)
-				// fmt.Println(days)
-				nextMon := fmt.Sprintf("%d%02d", end.Year(), end.Month())
-				return float64(a.dateMap[nextMon].Amount/GetDays(nextFirst, nextLast)*days) + totalCount
-			} else {
-				nextMon := fmt.Sprintf("%d%02d", nextFirst.Year(), nextFirst.Month())
-				fmt.Println(totalCount, nextMon, a.dateMap[nextMon].Amount)
-				totalCount = float64(a.dateMap[nextMon].Amount) + totalCount
-			}
+		if currentMon.Before(start) {
+			diffDays = GetDays(start, monLast)
+		} else if monLast.After(end) {
+			diffDays = GetDays(currentMon, end)
+		} else {
+			diffDays = GetDays(currentMon, monLast)
 		}
 
-		//endFirst := GetFirstDateOfMonth(end)
+		totalCount = float64((a.dateMap[mon].Amount / monDays * diffDays)) + totalCount
 
+		if monLast.After(end) {
+			return totalCount
+		}
+
+		currentMon = currentMon.AddDate(0, 1, 0)
 	}
-
-	startMon := fmt.Sprintf("%d%02d", start.Year(), start.Month())
-	// endMon := fmt.Sprintf("%d%02d", end.Year(), end.Month())
-	fmt.Print(startMon, a.dateMap)
-
-	fmt.Println("first = ", first)
-	fmt.Println("last = ", last)
-
-	return float64(a.dateMap[startMon].Amount)
 }
+
 func (a *Accounting) GetAll() {
 	a.dateMap = make(map[string]Budget)
 
